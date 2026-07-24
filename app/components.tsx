@@ -11,10 +11,10 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
         <nav aria-label="Primary navigation">
           <Link href="/list-project">List a Project</Link>
           <Link href="/explore">
-            Explore <small>Next</small>
+            Explore <small>Soon</small>
           </Link>
           <span className="nav-future">
-            Market <small>Later</small>
+            Market <small>Soon</small>
           </span>
         </nav>
         {user ? (
