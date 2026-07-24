@@ -32,9 +32,21 @@ The OAuth client must register both local and production callbacks:
 
 ## Data
 
-Structured product data and application sessions use the Sites-managed D1
-binding named `DB`. Generate schema migrations after changes with:
+Structured product data and application sessions use SQLite. Local development
+defaults to `./data/cofounder-exchange.sqlite`; Fly mounts the production
+database at `/data/cofounder-exchange.sqlite`.
+
+Generate schema migrations after changes with:
 
 ```bash
 npm run db:generate
+```
+
+## Fly deployment
+
+The production image uses Next.js standalone output, listens on
+`0.0.0.0:8080`, and mounts the `cofounder_exchange_data` volume at `/data`.
+
+```bash
+fly deploy
 ```

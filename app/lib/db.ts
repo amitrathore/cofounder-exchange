@@ -1,5 +1,11 @@
+import "server-only";
+
+import { mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import BetterSqlite3, { type Database as SqliteDatabase, type RunResult } from "better-sqlite3";
+
 type RuntimeEnv = {
-  DB?: D1Database;
+  DATABASE_PATH?: string;
   OIDC_ISSUER_URL?: string;
   OIDC_CLIENT_ID?: string;
   OIDC_CLIENT_SECRET?: string;
@@ -8,16 +14,77 @@ type RuntimeEnv = {
 };
 
 export function runtimeEnv(): RuntimeEnv {
-  const appGlobal = globalThis as typeof globalThis & {
-    __COFOUNDER_ENV__?: Record<string, unknown>;
+  return {
+    DATABASE_PATH: process.env.DATABASE_PATH,
+    OIDC_ISSUER_URL: process.env.OIDC_ISSUER_URL,
+    OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
+    OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
+    BASE_URL: process.env.BASE_URL,
+    ADMIN_EMAILS: process.env.ADMIN_EMAILS,
   };
-  return (appGlobal.__COFOUNDER_ENV__ ?? {}) as RuntimeEnv;
 }
 
-export function db(): D1Database {
-  const binding = runtimeEnv().DB;
-  if (!binding) throw new Error("The DB binding is unavailable.");
-  return binding;
+class PreparedStatement {
+  private values: unknown[] = [];
+
+  constructor(
+    private readonly database: SqliteDatabase,
+    private readonly query: string,
+  ) {}
+
+  bind(...values: unknown[]) {
+    this.values = values;
+    return this;
+  }
+
+  async first<T>() {
+    return (this.database.prepare(this.query).get(...this.values) as T | undefined) ?? null;
+  }
+
+  async all<T>() {
+    return { success: true, results: this.database.prepare(this.query).all(...this.values) as T[] };
+  }
+
+  async run() {
+    const result = this.runSync();
+    return { success: true, results: [], meta: result };
+  }
+
+  runSync(): RunResult {
+    return this.database.prepare(this.query).run(...this.values);
+  }
+}
+
+class AppDatabase {
+  constructor(private readonly database: SqliteDatabase) {}
+
+  prepare(query: string) {
+    return new PreparedStatement(this.database, query);
+  }
+
+  async batch(statements: PreparedStatement[]) {
+    const execute = this.database.transaction(() => statements.map((statement) => statement.runSync()));
+    return execute().map((meta) => ({ success: true, results: [], meta }));
+  }
+}
+
+const globalDatabase = globalThis as typeof globalThis & {
+  __cofounderDatabase?: AppDatabase;
+};
+
+export function db() {
+  if (!globalDatabase.__cofounderDatabase) {
+    const configuredPath = runtimeEnv().DATABASE_PATH;
+    const databasePath =
+      configuredPath ?? join(process.cwd(), "data", "cofounder-exchange.sqlite");
+    if (databasePath !== ":memory:") mkdirSync(dirname(databasePath), { recursive: true });
+    const database = new BetterSqlite3(databasePath);
+    database.pragma("journal_mode = WAL");
+    database.pragma("foreign_keys = ON");
+    database.pragma("busy_timeout = 5000");
+    globalDatabase.__cofounderDatabase = new AppDatabase(database);
+  }
+  return globalDatabase.__cofounderDatabase;
 }
 
 let schemaReady: Promise<void> | null = null;
