@@ -114,6 +114,18 @@ const schemaStatements = [
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
   `CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id)`,
+  `CREATE TABLE IF NOT EXISTS mcp_tokens (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    token_hash TEXT NOT NULL,
+    token_hint TEXT NOT NULL,
+    last_used_at TEXT,
+    revoked_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS mcp_tokens_hash_idx ON mcp_tokens(token_hash)`,
+  `CREATE INDEX IF NOT EXISTS mcp_tokens_user_idx ON mcp_tokens(user_id)`,
   `CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY NOT NULL,
     owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -215,4 +227,14 @@ export type ProjectRecord = {
   reviewed_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type McpTokenRecord = {
+  id: string;
+  user_id: string;
+  name: string;
+  token_hint: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
 };

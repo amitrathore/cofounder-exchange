@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { SiteFooter, SiteHeader, StatusPill } from "../components";
 import { requireUser } from "../lib/auth";
+import { mcpTokensForUser } from "../lib/mcp-auth";
 import { projectsForOwner } from "../lib/projects";
+import McpAccessPanel from "./McpAccessPanel";
 
 export const metadata = { title: "Your Projects" };
 export const dynamic = "force-dynamic";
@@ -18,7 +20,10 @@ export default async function Dashboard({
   searchParams: Promise<{ notice?: string }>;
 }) {
   const [user, query] = await Promise.all([requireUser("/dashboard"), searchParams]);
-  const projects = await projectsForOwner(user.id);
+  const [projects, mcpTokens] = await Promise.all([
+    projectsForOwner(user.id),
+    mcpTokensForUser(user.id),
+  ]);
   return (
     <>
       <SiteHeader user={user} />
@@ -71,6 +76,8 @@ export default async function Dashboard({
             <Link href="/list-project" className="button button-primary">List your first project →</Link>
           </section>
         )}
+
+        <McpAccessPanel initialTokens={mcpTokens} />
 
         <div className="dashboard-footer">
           <p>Signed in through Intergraph.</p>

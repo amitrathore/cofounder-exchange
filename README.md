@@ -50,3 +50,44 @@ The production image uses Next.js standalone output, listens on
 ```bash
 fly deploy
 ```
+
+## Remote MCP API
+
+Signed-in members can create and revoke personal MCP access tokens from their
+dashboard. Tokens are shown once, stored as SHA-256 hashes, and authorize only
+that member's founder profile and projects.
+
+The production Streamable HTTP endpoint is:
+
+```text
+https://cofounder.exchange/mcp
+```
+
+It exposes tools to read and update the founder profile; list, read, create,
+and update project drafts; explicitly submit a complete project for review;
+and archive a project. Configure clients to send the dashboard token as an
+`Authorization: Bearer …` header.
+
+Codex configuration:
+
+```toml
+[mcp_servers.cofounder_exchange]
+url = "https://cofounder.exchange/mcp"
+bearer_token_env_var = "COFOUNDER_EXCHANGE_TOKEN"
+```
+
+Claude Code project configuration:
+
+```json
+{
+  "mcpServers": {
+    "cofounder-exchange": {
+      "type": "http",
+      "url": "https://cofounder.exchange/mcp",
+      "headers": {
+        "Authorization": "Bearer ${COFOUNDER_EXCHANGE_TOKEN}"
+      }
+    }
+  }
+}
+```

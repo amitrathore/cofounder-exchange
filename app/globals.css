@@ -1022,6 +1022,195 @@ select:focus {
   font-size: 11px;
 }
 
+.mcp-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(440px, 1.2fr);
+  gap: clamp(44px, 7vw, 100px);
+  margin-top: 80px;
+  padding: 64px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.mcp-intro h2 {
+  margin: 0;
+  max-width: 560px;
+  font-family: var(--serif);
+  font-size: clamp(38px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.07;
+  letter-spacing: -0.045em;
+}
+
+.mcp-intro > p:not(.eyebrow) {
+  max-width: 580px;
+  color: var(--ink-soft);
+}
+
+.mcp-safety {
+  margin-top: 30px;
+  padding: 18px 20px;
+  border-left: 3px solid var(--red);
+  background: var(--paper-deep);
+  font-size: 12px;
+}
+
+.mcp-safety p {
+  margin: 3px 0 0;
+  color: var(--muted);
+}
+
+.mcp-controls {
+  min-width: 0;
+}
+
+.token-create {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.token-create label {
+  display: grid;
+  gap: 7px;
+}
+
+.token-create label span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.token-create input {
+  min-height: 50px;
+  width: 100%;
+  border: 1px solid var(--rule);
+  background: #fffdfa;
+  padding: 0 14px;
+  color: var(--ink);
+}
+
+.mcp-message {
+  margin: 14px 0 0;
+  color: var(--red-deep);
+  font-size: 12px;
+}
+
+.new-token {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #d4b58a;
+  background: #fbf2e5;
+}
+
+.new-token > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.new-token small {
+  color: var(--muted);
+}
+
+.new-token code {
+  display: block;
+  margin: 14px 0;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.new-token button,
+.mcp-configs button,
+.token-row button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mcp-configs {
+  margin-top: 24px;
+  border-top: 1px solid var(--rule);
+}
+
+.mcp-configs details {
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 0;
+}
+
+.mcp-configs summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.mcp-configs p {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.mcp-configs pre {
+  padding: 15px;
+  overflow-x: auto;
+  background: var(--ink);
+  color: var(--paper);
+  font: 10px/1.65 var(--mono);
+}
+
+.token-list {
+  margin-top: 32px;
+}
+
+.token-list-heading {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 12px;
+}
+
+.token-list-heading span {
+  font-family: var(--mono);
+  color: var(--red);
+}
+
+.token-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.token-row > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 13px;
+}
+
+.token-row code,
+.token-row small {
+  color: var(--muted);
+  font: 9px var(--mono);
+}
+
+.token-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .queue-count {
   display: flex;
   flex-direction: column;
@@ -1187,7 +1376,8 @@ select:focus {
 
   .split-heading,
   .standard-grid,
-  .form-section {
+  .form-section,
+  .mcp-panel {
     grid-template-columns: 1fr;
   }
 
@@ -1323,6 +1513,16 @@ select:focus {
   .row-link {
     grid-column: 2;
     margin-top: 0;
+  }
+
+  .token-create {
+    grid-template-columns: 1fr;
+  }
+
+  .new-token > div,
+  .token-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .review-columns section + section {
