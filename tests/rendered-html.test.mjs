@@ -18,6 +18,9 @@ before(async () => {
       HOSTNAME: "127.0.0.1",
       DATABASE_PATH: join(databaseDirectory, "test.sqlite"),
       BASE_URL: `http://127.0.0.1:${port}`,
+      OIDC_ISSUER_URL: "",
+      OIDC_CLIENT_ID: "",
+      OIDC_CLIENT_SECRET: "",
     },
     stdio: "pipe",
   });
@@ -63,4 +66,10 @@ test("redirects protected listing routes to Intergraph login", async () => {
   const response = await fetch(`http://127.0.0.1:${port}/list-project`, { redirect: "manual" });
   assert.equal(response.status, 307);
   assert.match(response.headers.get("location") ?? "", /^\/auth\/login\?return_to=/);
+});
+
+test("uses the public base URL for authentication redirects", async () => {
+  const response = await fetch(`http://127.0.0.1:${port}/auth/login`, { redirect: "manual" });
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), `http://127.0.0.1:${port}/?auth=unavailable`);
 });

@@ -1,26 +1,33 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { authCookieNames, randomToken, safeReturnTo, secureCookieOptions, sha256 } from "@/app/lib/auth";
+import {
+  authCookieNames,
+  publicBaseUrl,
+  randomToken,
+  safeReturnTo,
+  secureCookieOptions,
+  sha256,
+} from "@/app/lib/auth";
 import { runtimeEnv } from "@/app/lib/db";
 
 export async function GET(request: Request) {
   const config = runtimeEnv();
   const requestUrl = new URL(request.url);
+  const baseUrl = publicBaseUrl(request);
   const returnTo = safeReturnTo(requestUrl.searchParams.get("return_to"));
 
   if (!config.OIDC_ISSUER_URL || !config.OIDC_CLIENT_ID || !config.OIDC_CLIENT_SECRET) {
-    return NextResponse.redirect(new URL("/?auth=unavailable", requestUrl.origin));
+    return NextResponse.redirect(new URL("/?auth=unavailable", baseUrl));
   }
 
   const issuer = config.OIDC_ISSUER_URL.replace(/\/$/, "");
   const discoveryResponse = await fetch(`${issuer}/.well-known/openid-configuration`);
-  if (!discoveryResponse.ok) return NextResponse.redirect(new URL("/?auth=unavailable", requestUrl.origin));
+  if (!discoveryResponse.ok) return NextResponse.redirect(new URL("/?auth=unavailable", baseUrl));
   const discovery = (await discoveryResponse.json()) as { authorization_endpoint: string };
 
   const state = randomToken();
   const verifier = randomToken(48);
   const challenge = await sha256(verifier);
-  const baseUrl = (config.BASE_URL || requestUrl.origin).replace(/\/$/, "");
   const authorizationUrl = new URL(discovery.authorization_endpoint);
   authorizationUrl.searchParams.set("client_id", config.OIDC_CLIENT_ID);
   authorizationUrl.searchParams.set("redirect_uri", `${baseUrl}/auth/callback`);

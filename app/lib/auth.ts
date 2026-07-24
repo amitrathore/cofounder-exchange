@@ -74,6 +74,25 @@ export function safeReturnTo(value: string | null) {
   }
 }
 
+export function publicBaseUrl(request: Request) {
+  const configured = runtimeEnv().BASE_URL?.trim();
+  if (configured) {
+    const url = new URL(configured);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error("BASE_URL must use http or https.");
+    }
+    return url.origin;
+  }
+
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    const forwardedProtocol = request.headers.get("x-forwarded-proto") ?? "https";
+    return new URL(`${forwardedProtocol}://${forwardedHost}`).origin;
+  }
+
+  return new URL(request.url).origin;
+}
+
 export function authCookieNames() {
   return { session: SESSION_COOKIE, state: STATE_COOKIE, verifier: VERIFIER_COOKIE };
 }

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { authCookieNames, createSession, safeReturnTo } from "@/app/lib/auth";
+import { authCookieNames, createSession, publicBaseUrl, safeReturnTo } from "@/app/lib/auth";
 import { db, ensureSchema, runtimeEnv } from "@/app/lib/db";
 
 type UserInfo = {
@@ -15,6 +15,7 @@ type UserInfo = {
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  const baseUrl = publicBaseUrl(request);
   const cookieStore = await cookies();
   const stateCookie = cookieStore.get(authCookieNames().state)?.value ?? "";
   const verifier = cookieStore.get(authCookieNames().verifier)?.value ?? "";
@@ -28,22 +29,21 @@ export async function GET(request: Request) {
   cookieStore.delete(authCookieNames().verifier);
 
   if (!state || !code || !verifier || state !== expectedState) {
-    return NextResponse.redirect(new URL("/?auth=invalid-state", requestUrl.origin));
+    return NextResponse.redirect(new URL("/?auth=invalid-state", baseUrl));
   }
 
   const config = runtimeEnv();
   if (!config.OIDC_ISSUER_URL || !config.OIDC_CLIENT_ID || !config.OIDC_CLIENT_SECRET) {
-    return NextResponse.redirect(new URL("/?auth=unavailable", requestUrl.origin));
+    return NextResponse.redirect(new URL("/?auth=unavailable", baseUrl));
   }
 
   const issuer = config.OIDC_ISSUER_URL.replace(/\/$/, "");
   const discoveryResponse = await fetch(`${issuer}/.well-known/openid-configuration`);
-  if (!discoveryResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", requestUrl.origin));
+  if (!discoveryResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", baseUrl));
   const discovery = (await discoveryResponse.json()) as {
     token_endpoint: string;
     userinfo_endpoint: string;
   };
-  const baseUrl = (config.BASE_URL || requestUrl.origin).replace(/\/$/, "");
   const tokenResponse = await fetch(discovery.token_endpoint, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -56,19 +56,19 @@ export async function GET(request: Request) {
       code_verifier: verifier,
     }),
   });
-  if (!tokenResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", requestUrl.origin));
+  if (!tokenResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", baseUrl));
   const token = (await tokenResponse.json()) as { access_token?: string };
-  if (!token.access_token) return NextResponse.redirect(new URL("/?auth=failed", requestUrl.origin));
+  if (!token.access_token) return NextResponse.redirect(new URL("/?auth=failed", baseUrl));
 
   const profileResponse = await fetch(discovery.userinfo_endpoint, {
     headers: { authorization: `Bearer ${token.access_token}` },
   });
-  if (!profileResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", requestUrl.origin));
+  if (!profileResponse.ok) return NextResponse.redirect(new URL("/?auth=failed", baseUrl));
   const profile = (await profileResponse.json()) as UserInfo;
   const email = profile.email?.trim().toLowerCase();
   const externalId = profile.sub?.trim();
   if (!email || !externalId || profile.email_verified === false) {
-    return NextResponse.redirect(new URL("/?auth=profile-missing", requestUrl.origin));
+    return NextResponse.redirect(new URL("/?auth=profile-missing", baseUrl));
   }
   const fullName =
     profile.name?.trim() ||
