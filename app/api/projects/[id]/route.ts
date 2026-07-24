@@ -1,0 +1,59 @@
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/app/lib/auth";
+import { db, ensureSchema } from "@/app/lib/db";
+import { parseListingInput, validateForSubmission } from "@/app/lib/projects";
+
+export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Sign in to edit this listing." }, { status: 401 });
+  const input = parseListingInput(await request.json());
+  const errors = input.intent === "submit" ? validateForSubmission(input) : {};
+  if (Object.keys(errors).length) return NextResponse.json({ errors }, { status: 422 });
+  await ensureSchema();
+  const database = db();
+  const owned = await database
+    .prepare("SELECT id, status FROM projects WHERE id = ? AND owner_id = ?")
+    .bind(id, user.id)
+    .first<{ id: string; status: string }>();
+  if (!owned) return NextResponse.json({ error: "Listing not found." }, { status: 404 });
+  if (owned.status === "archived") return NextResponse.json({ error: "Archived listings cannot be edited." }, { status: 409 });
+
+  await database
+    .prepare(
+      `UPDATE users SET full_name = ?, avatar_url = ?, location = ?, timezone = ?, bio = ?,
+       skills = ?, links = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+    )
+    .bind(
+      input.founder.fullName || user.full_name,
+      input.founder.avatarUrl || null,
+      input.founder.location,
+      input.founder.timezone,
+      input.founder.bio,
+      JSON.stringify(input.founder.skills),
+      JSON.stringify(input.founder.links),
+      user.id,
+    )
+    .run();
+
+  const p = input.project;
+  const status = input.intent === "submit" ? "pending" : "draft";
+  await database
+    .prepare(
+      `UPDATE projects SET title=?, one_liner=?, problem=?, solution=?, stage=?, progress=?, category=?,
+       project_url=?, project_location=?, work_mode=?, current_team=?, role_title=?, role_description=?,
+       skills_needed=?, experience_needed=?, weekly_commitment=?, relationship=?, exchange_types=?,
+       equity_min=?, equity_max=?, offer_details=?, status=?, moderation_note='',
+       submitted_at=?, reviewed_at=NULL, reviewed_by=NULL, updated_at=CURRENT_TIMESTAMP
+       WHERE id=? AND owner_id=?`,
+    )
+    .bind(
+      p.title, p.oneLiner, p.problem, p.solution, p.stage, p.progress, p.category, p.projectUrl,
+      p.projectLocation, p.workMode, p.currentTeam, p.roleTitle, p.roleDescription,
+      JSON.stringify(p.skillsNeeded), p.experienceNeeded, p.weeklyCommitment, p.relationship,
+      JSON.stringify(p.exchangeTypes), p.equityMin, p.equityMax, p.offerDetails, status,
+      status === "pending" ? new Date().toISOString() : null, id, user.id,
+    )
+    .run();
+  return NextResponse.json({ id, status });
+}
