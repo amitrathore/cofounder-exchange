@@ -129,6 +129,8 @@ test("renders MCP token controls for an authenticated member", async () => {
   assert.match(html, /AI access \/ MCP/);
   assert.match(html, /Create access token/);
   assert.match(html, /https:\/\/cofounder\.exchange\/mcp/);
+  assert.match(html, /href="\/dashboard#mcp">MCP<\/a>/);
+  assert.match(html, /<section id="mcp" class="mcp-panel"/);
 });
 
 test("requires a bearer token for the remote MCP endpoint", async () => {

@@ -47,6 +47,7 @@ export function SiteFooter() {
         <div className="footer-links">
           <Link href="/list-project">List a Project</Link>
           <Link href="/explore">Explore Projects</Link>
+          <Link href="/dashboard#mcp">MCP</Link>
           <a href="https://cofounder.community">Cofounder.Community ↗</a>
         </div>
         <div className="footer-meta">

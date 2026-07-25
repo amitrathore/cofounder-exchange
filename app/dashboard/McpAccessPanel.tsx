@@ -88,7 +88,7 @@ export default function McpAccessPanel({ initialTokens }: { initialTokens: Token
   }
 
   return (
-    <section className="mcp-panel" aria-labelledby="mcp-heading">
+    <section id="mcp" className="mcp-panel" aria-labelledby="mcp-heading">
       <div className="mcp-intro">
         <p className="eyebrow">AI access / MCP</p>
         <h2 id="mcp-heading">Let an agent help shape the invitation.</h2>
