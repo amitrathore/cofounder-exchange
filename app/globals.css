@@ -66,6 +66,55 @@ button {
   padding-right: var(--gutter);
 }
 
+.community-banner {
+  position: relative;
+  z-index: 20;
+  margin: 0;
+  border-top: 3px solid var(--red);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.community-banner a {
+  min-height: 46px;
+  padding: 9px 24px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.community-banner a:hover {
+  background: var(--red-deep);
+  color: var(--paper);
+}
+
+.community-banner-label {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--paper) 38%, transparent);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.community-banner-arrow {
+  flex: 0 0 auto;
+  color: #e67264;
+  font-size: 15px;
+}
+
+.community-banner a:hover .community-banner-arrow {
+  color: var(--paper);
+  transform: translate(2px, -2px);
+}
+
 .site-header {
   border-bottom: 1px solid var(--rule);
   background: color-mix(in srgb, var(--paper) 94%, transparent);
@@ -1414,6 +1463,15 @@ select:focus {
 }
 
 @media (max-width: 680px) {
+  .community-banner a {
+    padding-inline: 16px;
+    font-size: 12px;
+  }
+
+  .community-banner-label {
+    display: none;
+  }
+
   .wordmark {
     font-size: 20px;
   }

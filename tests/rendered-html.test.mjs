@@ -97,6 +97,8 @@ test("server-renders the Cofounder Exchange landing page", async () => {
   assert.match(html, /List your project/);
   assert.match(html, /Log in with Intergraph/);
   assert.match(html, /Explore is coming next/);
+  assert.match(html, /href="https:\/\/cofounder\.community"/);
+  assert.match(html, /Explore the ideas and community behind the Exchange/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Starter Project/);
 });
 

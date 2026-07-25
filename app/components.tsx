@@ -3,34 +3,46 @@ import type { SessionUser } from "./lib/auth";
 
 export function SiteHeader({ user }: { user: SessionUser | null }) {
   return (
-    <header className="site-header">
-      <div className="shell nav-shell">
-        <Link href="/" className="wordmark" aria-label="Cofounder Exchange home">
-          Cofounder<span>.</span><strong>Exchange</strong>
-        </Link>
-        <nav aria-label="Primary navigation">
-          <Link href="/list-project">List a Project</Link>
-          <Link href="/explore">
-            Explore <small>Soon</small>
-          </Link>
-          <span className="nav-future">
-            Market <small>Soon</small>
+    <>
+      <aside className="community-banner" aria-label="Cofounder Community announcement">
+        <a href="https://cofounder.community">
+          <span className="community-banner-label">Read + join</span>
+          <span>
+            Explore the ideas and community behind the Exchange at{" "}
+            <strong>Cofounder.Community</strong>.
           </span>
-        </nav>
-        {user ? (
-          <div className="account-links">
-            {user.isAdmin && <Link href="/admin">Review</Link>}
-            <Link href="/dashboard" className="nav-button">
-              Dashboard
-            </Link>
-          </div>
-        ) : (
-          <Link href="/auth/login?return_to=/dashboard" className="nav-button">
-            Log in with Intergraph
+          <span className="community-banner-arrow" aria-hidden="true">↗</span>
+        </a>
+      </aside>
+      <header className="site-header">
+        <div className="shell nav-shell">
+          <Link href="/" className="wordmark" aria-label="Cofounder Exchange home">
+            Cofounder<span>.</span><strong>Exchange</strong>
           </Link>
-        )}
-      </div>
-    </header>
+          <nav aria-label="Primary navigation">
+            <Link href="/list-project">List a Project</Link>
+            <Link href="/explore">
+              Explore <small>Soon</small>
+            </Link>
+            <span className="nav-future">
+              Market <small>Soon</small>
+            </span>
+          </nav>
+          {user ? (
+            <div className="account-links">
+              {user.isAdmin && <Link href="/admin">Review</Link>}
+              <Link href="/dashboard" className="nav-button">
+                Dashboard
+              </Link>
+            </div>
+          ) : (
+            <Link href="/auth/login?return_to=/dashboard" className="nav-button">
+              Log in with Intergraph
+            </Link>
+          )}
+        </div>
+      </header>
+    </>
   );
 }
 
