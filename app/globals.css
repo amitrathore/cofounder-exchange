@@ -517,6 +517,19 @@ h1 span {
   justify-content: space-between;
 }
 
+.footer-attribution a {
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--red) 35%, transparent);
+  text-underline-offset: 3px;
+}
+
+.footer-attribution a:hover {
+  color: var(--red);
+  text-decoration-color: var(--red);
+}
+
 .coming-page {
   padding-top: 110px;
   padding-bottom: 130px;

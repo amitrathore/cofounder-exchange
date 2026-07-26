@@ -64,6 +64,11 @@ export function SiteFooter() {
         </div>
         <div className="footer-meta">
           <span>Private contact by design.</span>
+          <span className="footer-attribution">
+            By <a href="https://amitrathore.com">Amit Rathore ↗</a>
+            <span aria-hidden="true"> · </span>
+            <a href="https://awake.vc">AwakeVC ↗</a>
+          </span>
           <span>© MMXXVI · Cofounder.Exchange</span>
         </div>
       </div>
